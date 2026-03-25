@@ -8,30 +8,72 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-const SYSTEM_PROMPT = `You are an AI website builder assistant. You help users create beautiful, modern web pages.
+const TEMPLATE_INFO: Record<string, string> = {
+  apex: `Apex SaaS — A premium SaaS landing page with:
+- Dark background (#0a0a0f) with liquid glass effects (glassmorphism with blur)
+- HLS video background in the hero section
+- Geist Sans font, CSS variable color system (HSL)
+- Sections: Hero with navbar + video, Features grid, Chess layout (alternating image/text), Stats/numbers, Testimonials, CTA Footer
+- Gradient buttons, backdrop-blur panels, purple/blue accent colors
+- Live reference: https://apex-saas-seven.vercel.app/`,
 
-When a user describes what they want, you generate complete, self-contained HTML pages with inline CSS and JavaScript.
+  "ai-builder": `AI Builder — A minimal hero-focused landing page with:
+- Dark theme with motion/framer-motion animations
+- Bold typography, minimal sections (just Navbar + Hero)
+- Clean, modern aesthetic with animated elements
+- Lightweight and focused design
+- Live reference: https://ai-builder-zeta-three.vercel.app/`,
+
+  velorah: `Velorah — An elegant, serif-based hero page with:
+- Display serif font for headings
+- Video background via CloudFront CDN
+- Liquid glass buttons with blur effects
+- Minimalist, focus-driven design philosophy
+- "Begin Journey" style CTAs
+- Navigation links in a clean top bar
+- Live reference: https://velorah-blush.vercel.app/`,
+
+  studio: `Studio Agency — An AI-powered web design agency page with:
+- Heavy use of Motion (framer-motion) animations
+- BlurText animated components in the hero
+- Instrument Serif for headings, Barlow for body text
+- Liquid glass UI (stronger blur than other templates)
+- HLS video streaming background
+- Sections: Navbar, Hero with blur animations, Partners carousel, Start section, Features chess layout, Features grid, Stats, Testimonials, CTA Footer
+- Orange/rose accent gradients
+- Live reference: https://studio-agency-theta.vercel.app/`,
+};
+
+const SYSTEM_PROMPT = `You are an AI website builder assistant for MotionSites. You help users create beautiful, modern web pages based on our premium templates.
+
+We have 4 premium templates that users can select as a starting point:
+1. Apex SaaS — Premium SaaS landing page with liquid glass aesthetic
+2. AI Builder — Minimal hero-focused page with motion animations
+3. Velorah — Elegant, serif-based hero with video background
+4. Studio Agency — Full agency page with blur text animations
+
+When a user selects a template, you will receive detailed information about that template's design system, sections, and style. Use this as the foundation and customize it based on the user's requests.
 
 Guidelines:
-- Generate modern, responsive HTML5 pages with Tailwind CSS (via CDN link)
+- Generate complete, self-contained HTML pages with Tailwind CSS (via CDN: <script src="https://cdn.tailwindcss.com"></script>)
+- Match the dark aesthetic of our templates (#0a0a0f backgrounds, glassmorphism, blur effects)
 - Use beautiful gradients, glassmorphism effects, and modern design patterns
 - Include all styles inline or via Tailwind classes
 - Make pages fully responsive
-- Use placeholder images from picsum.photos or similar
-- Include smooth animations and hover effects
-- The generated code must be a complete, standalone HTML file
+- Use placeholder images from picsum.photos when needed
+- Include smooth animations and hover effects via CSS
+- The generated code must be a complete, standalone HTML file that works on its own
 
 When generating code, wrap it in \`\`\`html code blocks.
 
-When the user asks to modify something, regenerate the full page with the changes applied.
+When the user asks to modify something (change colors, text, images, sections), regenerate the full page with changes applied.
 
-Available templates to reference:
-- SaaS Landing Page (like Apex): Hero with video background, features grid, testimonials, CTA
-- Agency Page (like Studio): Animated hero, partners section, services grid, team section
-- AI Builder: Minimal hero-focused page with bold typography
-- Velorah: Elegant, serif-based hero with video background
+Help users customize: company name, colors, text content, images, section order, adding/removing sections, changing layouts, fonts, and animations.`;
 
-Help users customize colors, text, images, layouts, and sections.`;
+function buildSystemPrompt(templateId?: string): string {
+  if (!templateId || !TEMPLATE_INFO[templateId]) return SYSTEM_PROMPT;
+  return `${SYSTEM_PROMPT}\n\nThe user has selected the following template as their starting point:\n\n${TEMPLATE_INFO[templateId]}\n\nUse this template's design language, color scheme, and section structure as the foundation. Recreate a similar page and customize it based on the user's instructions.`;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,7 +82,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { message, projectId, history } = await req.json();
+    const { message, projectId, history, templateId } = await req.json();
     const userId = (session.user as any).id;
 
     // Save user message
@@ -65,7 +107,7 @@ export async function POST(req: NextRequest) {
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 8000,
-      system: SYSTEM_PROMPT,
+      system: buildSystemPrompt(templateId),
       messages,
     });
 

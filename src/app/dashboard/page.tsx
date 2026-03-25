@@ -14,7 +14,9 @@ import {
   X,
   ExternalLink,
   Loader2,
+  Sparkles,
 } from "lucide-react";
+import { templates } from "@/lib/templates";
 
 interface Message {
   role: "user" | "assistant";
@@ -45,6 +47,7 @@ export default function DashboardPage() {
   const [projectName, setProjectName] = useState("");
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,6 +74,14 @@ export default function DashboardPage() {
     }
   };
 
+  const selectTemplate = (templateId: string) => {
+    const tmpl = templates.find((t) => t.id === templateId);
+    if (!tmpl) return;
+    setSelectedTemplate(templateId);
+    const msg = `I want to create a website based on the "${tmpl.title}" template (${tmpl.description}). Reference: ${tmpl.url}`;
+    setInput(msg);
+  };
+
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
@@ -87,6 +98,7 @@ export default function DashboardPage() {
           message: userMessage,
           projectId: currentProjectId,
           history: messages,
+          templateId: selectedTemplate,
         }),
       });
 
@@ -106,7 +118,10 @@ export default function DashboardPage() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Sorry, something went wrong. Please try again." },
+        {
+          role: "assistant",
+          content: "Sorry, something went wrong. Please try again.",
+        },
       ]);
     }
 
@@ -123,6 +138,7 @@ export default function DashboardPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: projectName,
+          template: selectedTemplate,
           generatedCode,
         }),
       });
@@ -186,6 +202,7 @@ export default function DashboardPage() {
                 setGeneratedCode(null);
                 setShowPreview(false);
                 setCurrentProjectId(null);
+                setSelectedTemplate(null);
               }}
               className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
             >
@@ -193,7 +210,13 @@ export default function DashboardPage() {
             </button>
           </div>
 
+          {/* My Projects */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
+            {projects.length > 0 && (
+              <p className="text-[10px] uppercase tracking-wider text-white/30 px-1 mb-2">
+                My Projects
+              </p>
+            )}
             {projects.map((project) => (
               <div
                 key={project.id}
@@ -246,16 +269,78 @@ export default function DashboardPage() {
                   <h2 className="text-xl font-semibold text-white mb-2">
                     AI Website Builder
                   </h2>
-                  <p className="text-white/40 max-w-md">
-                    Describe the website you want to create. I&apos;ll generate it for
-                    you, and you can deploy it to Vercel with one click.
+                  <p className="text-white/40 max-w-md mb-8">
+                    Pick a template below as your starting point, or describe a
+                    website from scratch.
                   </p>
-                  <div className="flex flex-wrap gap-2 mt-6 justify-center">
+
+                  {/* Template Selection Cards */}
+                  <div className="grid grid-cols-2 gap-3 w-full max-w-lg mb-8">
+                    {templates.map((tmpl) => (
+                      <button
+                        key={tmpl.id}
+                        onClick={() => selectTemplate(tmpl.id)}
+                        className={`relative p-3 rounded-xl border text-left transition-all ${
+                          selectedTemplate === tmpl.id
+                            ? "border-purple-500 bg-purple-500/10"
+                            : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]"
+                        }`}
+                      >
+                        {/* Mini preview */}
+                        <div
+                          className={`aspect-[16/9] rounded-lg bg-gradient-to-br ${tmpl.gradient} overflow-hidden mb-2 relative`}
+                        >
+                          <iframe
+                            src={tmpl.url}
+                            title={tmpl.title}
+                            className="w-[1440px] h-[900px] origin-top-left pointer-events-none border-0"
+                            style={{
+                              transform: "scale(0.12)",
+                              transformOrigin: "top left",
+                            }}
+                            loading="lazy"
+                            sandbox="allow-scripts allow-same-origin"
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-white">
+                              {tmpl.title}
+                            </p>
+                            <p className="text-[11px] text-white/40">
+                              {tmpl.category}
+                            </p>
+                          </div>
+                          {tmpl.tag && (
+                            <span className="flex items-center gap-1 text-[10px] text-purple-400">
+                              <Sparkles className="w-2.5 h-2.5" />
+                              {tmpl.tag}
+                            </span>
+                          )}
+                        </div>
+                        <a
+                          href={tmpl.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-[10px] text-white/30 hover:text-purple-400 flex items-center gap-1 mt-1"
+                        >
+                          <ExternalLink className="w-2.5 h-2.5" /> Preview live
+                        </a>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Quick prompts */}
+                  <p className="text-xs text-white/30 mb-3">
+                    Or start from scratch:
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center">
                     {[
                       "Create a SaaS landing page",
-                      "Build an agency portfolio",
-                      "Make a personal blog",
-                      "Design a product showcase",
+                      "Build a portfolio site",
+                      "Make a product showcase",
+                      "Design a blog layout",
                     ].map((suggestion) => (
                       <button
                         key={suggestion}
@@ -289,7 +374,10 @@ export default function DashboardPage() {
                     }`}
                   >
                     <p className="whitespace-pre-wrap">
-                      {msg.content.replace(/```html[\s\S]*?```/g, "[Generated Code - See Preview →]")}
+                      {msg.content.replace(
+                        /```html[\s\S]*?```/g,
+                        "[Generated Code - See Preview →]"
+                      )}
                     </p>
                   </div>
                   {msg.role === "user" && (
@@ -318,6 +406,24 @@ export default function DashboardPage() {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Selected template indicator */}
+            {selectedTemplate && (
+              <div className="mx-4 mb-2 px-3 py-2 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-between">
+                <span className="text-xs text-purple-300">
+                  Using template:{" "}
+                  <strong>
+                    {templates.find((t) => t.id === selectedTemplate)?.title}
+                  </strong>
+                </span>
+                <button
+                  onClick={() => setSelectedTemplate(null)}
+                  className="text-purple-400 hover:text-white"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
             {/* Input */}
             <div className="p-4 border-t border-white/10">
               <div className="flex gap-3">
@@ -325,8 +431,14 @@ export default function DashboardPage() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-                  placeholder="Describe the website you want to build..."
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && !e.shiftKey && sendMessage()
+                  }
+                  placeholder={
+                    selectedTemplate
+                      ? `Customize the ${templates.find((t) => t.id === selectedTemplate)?.title} template...`
+                      : "Describe the website you want to build..."
+                  }
                   className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 transition-colors"
                 />
                 <button
@@ -356,9 +468,7 @@ export default function DashboardPage() {
                     <Save className="w-3.5 h-3.5" /> Save
                   </button>
                   <button
-                    onClick={() => {
-                      setShowPreview(false);
-                    }}
+                    onClick={() => setShowPreview(false)}
                     className="p-1.5 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
                   >
                     <X className="w-4 h-4" />
@@ -382,7 +492,9 @@ export default function DashboardPage() {
       {showSaveModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-white mb-4">Save Project</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Save Project
+            </h3>
             <input
               type="text"
               value={projectName}
