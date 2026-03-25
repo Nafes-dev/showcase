@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const TEMPLATE_INFO: Record<string, string> = {
@@ -95,24 +95,23 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Build message history for Claude
-    const messages = [
+    // Build message history for OpenAI
+    const messages: { role: "system" | "user" | "assistant"; content: string }[] = [
+      { role: "system", content: buildSystemPrompt(templateId) },
       ...(history || []).map((msg: any) => ({
         role: msg.role as "user" | "assistant",
         content: msg.content,
       })),
-      { role: "user" as const, content: message },
+      { role: "user", content: message },
     ];
 
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
       max_tokens: 8000,
-      system: buildSystemPrompt(templateId),
       messages,
     });
 
-    const assistantMessage =
-      response.content[0].type === "text" ? response.content[0].text : "";
+    const assistantMessage = response.choices[0]?.message?.content || "";
 
     // Save assistant message
     await prisma.message.create({
