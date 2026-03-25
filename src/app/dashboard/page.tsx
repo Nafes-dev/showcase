@@ -426,20 +426,29 @@ export default function DashboardPage() {
 
             {/* Input */}
             <div className="p-4 border-t border-white/10">
-              <div className="flex gap-3">
-                <input
-                  type="text"
+              <div className="flex gap-3 items-end">
+                <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" && !e.shiftKey && sendMessage()
-                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
                   placeholder={
                     selectedTemplate
                       ? `Customize the ${templates.find((t) => t.id === selectedTemplate)?.title} template...`
                       : "Describe the website you want to build..."
                   }
-                  className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 transition-colors"
+                  rows={1}
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = "auto";
+                    target.style.height = Math.min(target.scrollHeight, 160) + "px";
+                  }}
+                  className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 transition-colors resize-none overflow-y-auto"
+                  style={{ maxHeight: "160px" }}
                 />
                 <button
                   onClick={sendMessage}
