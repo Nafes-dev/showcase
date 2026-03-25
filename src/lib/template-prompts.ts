@@ -41,23 +41,47 @@ LIQUID GLASS CSS (critical — use this exact CSS):
 \`\`\`
 
 PAGE STRUCTURE (7 sections in order):
-1. HERO SECTION: Full-screen with video background, gradient overlay fading to background color at bottom. Centered floating navbar in liquid-glass pill with logo + nav items + CTA button. Hero content centered: announcement badge (liquid-glass pill), large heading (text-4xl to text-7xl, font-semibold), subheading, two CTA buttons. Bottom: social proof marquee bar with brand logos.
+1. HERO SECTION: Full-screen with video background (USE: https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260309_042944_4a2205b7-b061-490a-852b-92d9e9955ce9.mp4), gradient overlay fading to background color at bottom using: background: linear-gradient(to bottom, transparent 0%, transparent 30%, hsl(260 87% 3% / 0.1) 45%, hsl(260 87% 3% / 0.4) 60%, hsl(260 87% 3% / 0.75) 75%, hsl(260 87% 3%) 95%). Centered floating navbar in liquid-glass pill with logo + nav items + CTA button. Hero content centered: announcement badge (liquid-glass pill), large heading (text-4xl to text-7xl, font-semibold), subheading, two CTA buttons. Bottom: social proof marquee bar with brand logos (use CSS animation: @keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } } with animation: marquee 20s linear infinite).
 
-2. FEATURES SECTION: Video background with gradient overlays top+bottom + semi-transparent background overlay. Header with liquid-glass badge + large heading + description. 3-column grid of liquid-glass cards, each with icon, title, description, and bottom stat (value + label separated by border-t).
+2. FEATURES SECTION: Video background (USE: https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4) with gradient overlays top+bottom (h-[40%] bg-gradient-to-b from-[hsl(260,87%,3%)] via-[hsl(260,87%,3%/0.8)] to-transparent) + semi-transparent bg overlay (bg-[hsl(260,87%,3%/0.4)]). Header with liquid-glass badge + large heading + description. 3-column grid of liquid-glass cards, each with SVG icon (use simple SVG paths, NOT emoji), title, description, and bottom stat (value + label separated by border-t border-white/10).
 
-3. CHESS SECTION (image left, text right): 2-column grid. Left: liquid-glass rounded-3xl container with video/image (aspect-4/3). Right: liquid-glass badge, large heading, description paragraph, bullet list with small green dots, two CTA buttons.
+3. CHESS SECTION (image left, text right): 2-column grid (lg:grid-cols-2 gap-20 items-center). Left: liquid-glass rounded-3xl container with image (USE: https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80, aspect-[4/3] object-cover). Right: liquid-glass badge, large heading, description paragraph, bullet list with small green dots (w-1.5 h-1.5 rounded-full bg-[hsl(121,95%,76%)]), two CTA buttons.
 
-4. REVERSE CHESS SECTION (text left, image right): Same layout reversed. Left: badge, heading, description, 2x2 grid of stat cards (liquid-glass rounded-2xl with value + label). Right: video/image container.
+4. REVERSE CHESS SECTION (text left, image right): Same layout reversed using order classes. Left: badge, heading, description, 2x2 grid of stat cards (liquid-glass rounded-2xl p-4 with value text-xl font-semibold + label text-xs). Right: image container (USE: https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80).
 
-5. NUMBERS SECTION: Video background with gradient overlay. Centered giant metric ($4.7B style, text-7xl to text-[10rem]), label underneath, description. Below: liquid-glass card with 2-column metrics grid.
+5. NUMBERS SECTION: Video background (USE: https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4) with gradient overlay. Centered giant metric ($4.7B style, text-7xl sm:text-[8rem] lg:text-[10rem] font-semibold tracking-tighter), label underneath, description. Below: liquid-glass rounded-3xl p-12 card with 2-column metrics grid (border-r border-white/10 between them).
 
-6. TESTIMONIALS SECTION: Header with heading + subtitle. 3-column grid of liquid-glass cards. Middle card offset with md:-translate-y-6. Each card: quoted text, border-t divider, avatar circle with initials + name + role.
+6. TESTIMONIALS SECTION: Header with heading + subtitle. 3-column grid of liquid-glass rounded-3xl p-8 cards. Middle card offset with md:-translate-y-6. Each card: quoted text (text-sm leading-relaxed), border-t border-white/10 divider mt-6 pt-6, avatar circle (w-10 h-10 rounded-full bg-[hsl(240,4%,16%)] with initials) + name + role.
 
-7. CTA + FOOTER: Video background with gradient. Liquid-glass card (rounded-[2rem]) centered with heading, description, two CTA buttons. Below: footer with logo + description, 3 link columns (Product, Company, Resources), bottom bar with copyright + legal links.
+7. CTA + FOOTER: Video background (reuse hero video) with gradient overlay. Liquid-glass rounded-[2rem] p-12 sm:p-20 card centered with heading, description, two CTA buttons. Below: footer with logo + description, 3 link columns (Product, Company, Resources), bottom bar with copyright + legal links.
 
 BUTTON STYLES:
-- Primary "hero" button: bg-white text-black rounded-full px-6 py-3 font-medium hover:bg-white/90
-- Secondary "heroSecondary" button: liquid-glass rounded-full with white text, border via ::before gradient`,
+- Primary "hero" button: bg-white text-black rounded-full px-6 py-3 font-medium hover:bg-white/90 transition-colors
+- Secondary "heroSecondary" button: liquid-glass rounded-full px-6 py-3 text-white hover:bg-white/[0.03] transition-colors
+
+REQUIRED CSS ANIMATIONS (include ALL of these in <style>):
+\`\`\`css
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 20s linear infinite; }
+
+@keyframes fade-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-rise { animation: fade-rise 0.8s ease-out both; }
+.animate-fade-rise-delay { animation: fade-rise 0.8s ease-out 0.2s both; }
+.animate-fade-rise-delay-2 { animation: fade-rise 0.8s ease-out 0.4s both; }
+\`\`\`
+
+CRITICAL REMINDERS:
+- Every <video> tag MUST have: autoplay loop muted playsinline, class="absolute inset-0 w-full h-full object-cover"
+- Every video section MUST have a gradient overlay div on top of the video
+- The navbar MUST be a floating liquid-glass pill (not a flat bar)
+- All cards MUST use the liquid-glass class (not plain backgrounds)
+- SVG icons only (draw simple paths) — NEVER use emoji characters as icons`,
 
   "ai-builder": `You are recreating a website based on the "AI Builder" template. Here is the EXACT design system and structure:
 
@@ -187,25 +211,39 @@ export const BASE_SYSTEM_PROMPT = `You are an AI website builder assistant for M
 
 CRITICAL RULES:
 1. Generate complete, self-contained HTML files with Tailwind CSS via CDN: <script src="https://cdn.tailwindcss.com"></script>
-2. Include ALL CSS (liquid-glass effects, animations, fonts) in a <style> tag
+2. Include ALL CSS (liquid-glass effects, animations, fonts) in a <style> tag inside <head>
 3. Include Google Fonts via <link> tags in <head>
 4. The output must be a single HTML file that works standalone
-5. Match the EXACT design system of the selected template
+5. Match the EXACT design system of the selected template — this means EXACT colors, fonts, effects, and layout
 6. When generating code, wrap it in \`\`\`html code blocks
 7. When the user asks to modify something, regenerate the FULL page with changes applied
 
-GENERAL STYLE GUIDELINES:
-- Dark backgrounds (#000 or hsl(260,87%,3%))
-- Liquid glass/glassmorphism effects on cards, buttons, navbars
-- Modern sans-serif or elegant serif typography
-- Responsive design (mobile-first with sm/md/lg breakpoints)
-- Subtle animations (fade-in, scale on hover)
-- Video backgrounds where applicable (use placeholder gradient if no video URL)
-- White/light text on dark backgrounds
-- Gradient overlays on video sections
+MANDATORY VISUAL REQUIREMENTS — DO NOT SKIP THESE:
+- ALWAYS include video backgrounds using the provided video URLs. Use <video autoplay loop muted playsinline> tags
+- ALWAYS include the liquid-glass CSS exactly as specified (with the ::before pseudo-element gradient border)
+- ALWAYS include CSS animations (fade-in on scroll, hover scale effects, marquee for brand logos)
+- ALWAYS use gradient overlays on video sections (linear-gradient from transparent to background color)
+- ALWAYS use backdrop-filter: blur() for glassmorphism
+- NEVER use plain white/gray card backgrounds — use liquid-glass or bg-white/[0.02] with border border-white/[0.06]
+- NEVER use emoji icons — use SVG icons or Lucide-style SVG paths
+- NEVER leave image/video placeholders empty — always use the provided video URLs or gradient backgrounds
+- ALWAYS use the exact color values from the template (HSL variables)
+
+AVAILABLE VIDEO BACKGROUNDS (use these in sections):
+- Hero: https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260309_042944_4a2205b7-b061-490a-852b-92d9e9955ce9.mp4
+- Features: https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4
+- Secondary: https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4
+
+AVAILABLE PLACEHOLDER IMAGES (use for chess/feature sections):
+- https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=80 (AI/tech)
+- https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80 (AI abstract)
+- https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80 (data/analytics)
+- https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80 (dashboard)
 
 When the user provides a company name, replace ALL template placeholder names (APEX, Velorah, Studio, etc.) with their company name throughout the entire page.
-When the user describes their industry, adapt the copy/text content to match their business.`;
+When the user describes their industry, adapt the copy/text content to match their business.
+
+REMEMBER: The quality bar is a premium, production-ready website. Every section must have visual depth — video backgrounds, glass effects, gradient overlays, and animations. Never output a flat or basic-looking page.`;
 
 export function buildFullSystemPrompt(templateId?: string): string {
   if (!templateId || !TEMPLATE_SYSTEM_PROMPTS[templateId]) {
