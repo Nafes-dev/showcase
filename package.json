@@ -1,13 +1,10 @@
 {
-  "name": "showcase-platform",
-  "version": "0.1.0",
+  "name": "project",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "prisma generate && next build",
-    "start": "next start",
-    "postinstall": "prisma generate",
-    "lint": "next lint"
+    "build": "node canary.js && tsc",
+    "prepare": "node canary.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
